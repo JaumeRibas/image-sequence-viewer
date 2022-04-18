@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+	 <head>
+		<meta charset="UTF-8">
+		<title>Image Sequence Viewer</title>
+		<script
+			  src="https://code.jquery.com/jquery-3.6.0.min.js"
+			  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+			  crossorigin="anonymous"></script>
+		<style>
+			body {
+				color: white;
+				background-color: black;
+			}
+			#viewer {				
+				position: relative;
+				margin-top: 0.5em;
+			}
+			#viewer img {
+				position:absolute;
+			}
+			label:not(:first-child) {
+				margin-left: 0.5em;
+			}
+			button {
+				margin-left: 0.5em;
+			}
+			fieldset {
+				display: inline;
+				border: none;
+			}
+			input[type="number"] {
+				width: 5em;
+			}
+			#path {
+				width: 20em;
+			}
+		</style>
+	 </head>
+	 <body>
+			<form>
+				<label for="first-image">
+				<span>Load: </span>
+				</label>
+				<input type="file" id="first-image" name="first-image" title="Select the first image to view">
+				<label for="path">
+				<span>Path: </span>
+				</label>
+				<input type="text" id="path" name="path" placeholder="inform manually" title="The path of the images folder. You can copy it at the same time you select the first image.">
+
+				<label for="prefix">
+				<span>Prefix: </span>
+				</label>
+				<input type="text" id="prefix" name="prefix" title="The part of the image name before the index">
+				
+				<label for="suffix">
+				<span>Suffix: </span>
+				</label>
+				<input type="text" id="suffix" name="suffix" title="The part of the image name after the index">
+				
+				<label for="first-index">
+				<span>First index: </span>
+				</label>
+				<input type="number" id="first-index" name="first-index" title="The index of the first image to view">
+				
+				<label for="current-index">
+				<span>Index: </span>
+				</label>
+				<input type="number" id="current-index" name="current-index" title="The index of the currently shown image">
+				
+				<label for="index-leap">
+				<span>Index leap: </span>
+				</label>
+				<input type="number" id="index-leap" name="index-leap" value="1" title="The index increment between consecutive images">
+
+				<button id="playPauseButton" type="button">Play/Pause</button>
+				<button id="restartButton" type="button">Restart</button>
+			</form>
+			<section>
+				<span id="log"></span>
+			</section>
+			<section id="viewer">
+				<img id="img" src="" />
+			</section>
+			<script>
+				const framePeriodMillis = 42;
+				//global variables
+				let playbackStopped = true;
+				let currentIndex = null;
+				let indexLeap = 1;
+				let prefix = null;
+				let suffix = null;
+				let path = null;
+				let mouseDown = false;
+				let clickX;
+				let clickY;
+				let previousImageUrl;
+				let frameLoadStartTime;
+				let $img = $("#img");
+				let $log = $("#log");
+				let $path = $("#path");
+				let $currentIndex = $("#current-index");
+				let $indexLeap = $("#index-leap");
+				let $prefix = $("#prefix");
+				let $suffix = $("#suffix");
+				let $firstIndex = $("#first-index");
+				let $firstImage = $("#first-image");
+				let $playPauseButton = $("#playPauseButton");
+				let $restartButton = $("#restartButton");
+				let $viewer = $("#viewer");
+				let $html = $("html");
+				let $window = $(window);
+				let $document = $(document);
+				let $inputs = $("input");
+				
+				//functions
+				function log(text) {
+					$log.append(text);
+				}
+				
+				function clearLog() {
+					$log.empty();
+				}
+				
+				function loadFormData() {
+					path = $path.val();
+					if (path) {
+						path = "file:///" + path;
+					}
+					currentIndex = parseInt($currentIndex.val());
+					indexLeap = parseInt($indexLeap.val());
+					prefix = $prefix.val();
+					suffix = $suffix.val();
+				}
+				
+				function getImageUrl() {
+					return path + "/" + prefix + currentIndex + suffix;
+				}
+				
+				function playPause() {
+					currentIndex = parseInt($currentIndex.val());
+					if (!playbackStopped) {
+						playbackStopped = true;
+					} else {
+						playbackStopped = false;
+						changeFrame();
+					}
+				}
+				
+				function changeFrame() {
+					if (!playbackStopped) {
+						frameLoadStartTime = Date.now();
+						currentIndex += indexLeap;
+						let imageUrl = getImageUrl();
+						previousImageUrl = $img.attr("src");
+						console.log(imageUrl);	
+						$img.attr("src", imageUrl);
+						$currentIndex.val(currentIndex);
+					}
+				}
+
+				function updateScrollPos(e) {
+					$html.css("cursor", "none");
+					$window.scrollLeft($window.scrollLeft() + (clickX - e.pageX));
+					$window.scrollTop($window.scrollTop() + (clickY - e.pageY));
+				}
+				
+				//events
+				$img[0].onload = function() {
+					let timeout = framePeriodMillis - (Date.now() - frameLoadStartTime);
+					if (timeout < 0) { 
+						timeout = 0;
+						console.warn("lagging");
+					}
+					setTimeout(function() {
+						changeFrame();
+					}, timeout);
+				};
+				$img[0].onerror = function() {
+					!playbackStopped && log("error loading image at " + $img.attr("src"));
+					playbackStopped = true;
+					$img.attr("src", previousImageUrl);
+				}
+				
+				$firstImage.change(function(){
+					let imageName = $(this)[0].files[0].name;
+					let match = /\d+(?!.*\d)/g.exec(imageName);
+					if (match === null) {
+						alert("File doesn't have a numeric index in it's name.")
+					} else {
+						let firstIndex = match[0];
+						let prefix = imageName.substring(0, match.index);
+						let suffix = imageName.substring(match.index + firstIndex.length);
+						$prefix.val(prefix);
+						$suffix.val(suffix);
+						$firstIndex.val(firstIndex);
+						$currentIndex.val(firstIndex);
+						loadFormData();
+						if (path) {
+							$img.attr("src", getImageUrl());
+						}
+					}
+				});
+				
+				$path.change(function() {
+					path = $path.val();
+					if (path) {
+						path = "file:///" + path;
+					}
+					if (path && currentIndex !== null) {
+						$img.attr("src", getImageUrl());
+					} else {
+						$img.attr("src", "");
+					}
+				});
+				
+				$restartButton.click(function(){
+					clearLog();
+					playbackStopped = false;
+					loadFormData();
+					currentIndex = parseInt($firstIndex.val());
+					changeFrame();	
+				});
+				
+				$playPauseButton.click(playPause);
+				
+				//pause/resume right click
+				$viewer.contextmenu(function(e) {
+					e.preventDefault();
+					playPause();
+				});
+
+				//drag scroll
+				$viewer.on({
+					"mousemove": function(e) {
+						mouseDown && updateScrollPos(e);
+					},
+					"mousedown": function(e) {
+						e.preventDefault();
+						mouseDown = true;
+						clickX = e.pageX;
+						clickY = e.pageY;
+					},
+					"mouseup": function(e) {
+						mouseDown = false;
+						$html.css("cursor", "auto");
+					}
+				});
+				
+				//next previous frame with arrows
+				$document.keyup(function(e){
+					if (!$inputs.is(":focus")) {
+						let key = e.which;
+						switch (key) {
+							case 37: //left
+								currentIndex -= parseInt($indexLeap.val());
+								$img.attr("src", getImageUrl());
+								$currentIndex.val(currentIndex);
+							break;
+							case 39://right
+								currentIndex += parseInt($indexLeap.val());
+								$img.attr("src", getImageUrl());
+								$currentIndex.val(currentIndex);
+							break;
+						}
+					}
+				});	
+				
+				//init				
+				loadFormData();
+				if (path && currentIndex !== null) {
+					$img.attr("src", getImageUrl());
+				}
+				
+			</script>
+	 </body>
+</html>
+
