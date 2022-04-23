@@ -72,6 +72,11 @@
 				<span>Index leap: </span>
 				</label>
 				<input type="number" id="index-leap" name="index-leap" value="1" title="The index increment between consecutive images">
+				
+				<label for="index-leap">
+				<span>Flip upside down: </span>
+				</label>
+				<input type="checkbox" id="filp-upside-down" name="filp-upside-down" title="Inverts the images vertically">
 
 				<button id="playPauseButton" type="button">Play/Pause</button>
 				<button id="restartButton" type="button">Restart</button>
@@ -105,6 +110,7 @@
 				let $suffix = $("#suffix");
 				let $firstIndex = $("#first-index");
 				let $firstImage = $("#first-image");
+				let $flipUpsideDown = $("#filp-upside-down");
 				let $playPauseButton = $("#playPauseButton");
 				let $restartButton = $("#restartButton");
 				let $viewer = $("#viewer");
@@ -211,6 +217,14 @@
 						$img.attr("src", getImageUrl());
 					} else {
 						$img.attr("src", "");
+					}
+				});
+				
+				$flipUpsideDown.change(function() {
+					if ($flipUpsideDown.is(":checked")) {
+						$img.css({ "transform": "scaleY(-1)" });
+					} else {					
+						$img.css({ "transform": "" });
 					}
 				});
 				
