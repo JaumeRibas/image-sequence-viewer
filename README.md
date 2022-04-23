@@ -3,9 +3,9 @@ Extremely rough and simple single-page app to 'play' a sequence of images as if 
 
 The images must be all in the same folder and have a consistent name with a numeric index without leading zeros. The name cannot contain any digits after the image index as the last integer in the name is assumed to be the index.
 
-## Link
+## Download
 
-[Image Sequence Viewer](https://htmlpreview.github.io/?https://github.com/JaumeRibas/image-sequence-viewer/blob/main/image-sequence-viewer.html)
+[Image Sequence Viewer](https://github.com/JaumeRibas/image-sequence-viewer/releases/download/v1.0.0/image-sequence-viewer.html)
 
 ## How to use
 
