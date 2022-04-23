@@ -17,7 +17,7 @@ The images must be all in the same folder and have a consistent name with a nume
 6. Paste the previously copied folder path to the `Path` input.
 7. Click the `Play/Pause` button.
 
-The mouse can be used to pause or resume playback, by right clicking, or for panning, if the images are larger than the window, by holding down the left button.
+The mouse can be used to pause or resume playback, by right clicking; or for panning, if the images are larger than the window, by holding down the left button.
 The left an right arrow keys can be used, while the playback is paused, to move to the previous and next image.
 
 The browser's built-in zooming function can be used to zoom in to a particular area of the image playback.
