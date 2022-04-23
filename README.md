@@ -1,7 +1,7 @@
 # image-sequence-viewer
 Extremely rough and simple single-page app to 'play' a sequence of images as if it where a video.
 
-The images must be all in the same folder and have a consistent name with a numeric index. The name cannot contain any digits after the image index as the last integer in the name is assumed to be the index.
+The images must be all in the same folder and have a consistent name with a numeric index without leading zeros. The name cannot contain any digits after the image index as the last integer in the name is assumed to be the index.
 
 ## Link
 
