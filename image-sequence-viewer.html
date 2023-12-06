@@ -3,10 +3,6 @@
 	 <head>
 		<meta charset="UTF-8">
 		<title>Image Sequence Viewer</title>
-		<script
-			  src="https://code.jquery.com/jquery-3.6.0.min.js"
-			  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
-			  crossorigin="anonymous"></script>
 		<style>
 			body {
 				color: white;
@@ -101,42 +97,45 @@
 				let clickY;
 				let previousImageUrl;
 				let frameLoadStartTime;
-				let $img = $("#img");
-				let $log = $("#log");
-				let $path = $("#path");
-				let $currentIndex = $("#current-index");
-				let $indexLeap = $("#index-leap");
-				let $prefix = $("#prefix");
-				let $suffix = $("#suffix");
-				let $firstIndex = $("#first-index");
-				let $firstImage = $("#first-image");
-				let $flipUpsideDown = $("#filp-upside-down");
-				let $playPauseButton = $("#playPauseButton");
-				let $restartButton = $("#restartButton");
-				let $viewer = $("#viewer");
-				let $html = $("html");
-				let $window = $(window);
-				let $document = $(document);
-				let $inputs = $("input");
+				let imgElement = document.getElementById("img");
+				let logElement = document.getElementById("log");
+				let pathInput = document.getElementById("path");
+				let currentIndexInput = document.getElementById("current-index");
+				let indexLeapInput = document.getElementById("index-leap");
+				let prefixInput = document.getElementById("prefix");
+				let suffixInput = document.getElementById("suffix");
+				let firstIndexInput = document.getElementById("first-index");
+				let firstImageInput = document.getElementById("first-image");
+				let flipUpsideDownInput = document.getElementById("filp-upside-down");
+				let playPauseButton = document.getElementById("playPauseButton");
+				let restartButton = document.getElementById("restartButton");
+				let viewerElement = document.getElementById("viewer");
+				let html = document.documentElement;
 				
 				//functions
 				function log(text) {
-					$log.append(text);
+					logElement.textContent += text;
 				}
 				
 				function clearLog() {
-					$log.empty();
+					logElement.textContent = "";
 				}
 				
 				function loadFormData() {
-					path = $path.val();
+					path = pathInput.value;
 					if (path) {
 						path = "file:///" + path;
 					}
-					currentIndex = parseInt($currentIndex.val());
-					indexLeap = parseInt($indexLeap.val());
-					prefix = $prefix.val();
-					suffix = $suffix.val();
+					const currentIndexInputValue = currentIndexInput.value;
+					if (currentIndexInputValue) {
+						currentIndex = parseInt(currentIndexInputValue);
+					}
+					const indexLeapInputValue = indexLeapInput.value;
+					if (indexLeapInputValue) {
+						indexLeap = parseInt(indexLeapInputValue);					
+					}
+					prefix = prefixInput.value;
+					suffix = suffixInput.value;
 				}
 				
 				function getImageUrl() {
@@ -144,7 +143,7 @@
 				}
 				
 				function playPause() {
-					currentIndex = parseInt($currentIndex.val());
+					currentIndex = parseInt(currentIndexInput.value);
 					if (!playbackStopped) {
 						playbackStopped = true;
 					} else {
@@ -154,42 +153,47 @@
 				}
 				
 				function changeFrame() {
-					if (!playbackStopped) {
-						frameLoadStartTime = Date.now();
-						currentIndex += indexLeap;
-						let imageUrl = getImageUrl();
-						previousImageUrl = $img.attr("src");
-						console.log(imageUrl);	
-						$img.attr("src", imageUrl);
-						$currentIndex.val(currentIndex);
-					}
+					frameLoadStartTime = Date.now();
+					currentIndex += indexLeap;
+					let imageUrl = getImageUrl();
+					previousImageUrl = imgElement.getAttribute("src");
+					console.log(imageUrl);	
+					imgElement.setAttribute("src", imageUrl);
+					currentIndexInput.value = currentIndex;
 				}
 
 				function updateScrollPos(e) {
-					$html.css("cursor", "none");
-					$window.scrollLeft($window.scrollLeft() + (clickX - e.pageX));
-					$window.scrollTop($window.scrollTop() + (clickY - e.pageY));
+					html.style.cursor = "none";
+					html.scrollLeft += clickX - e.pageX;
+					html.scrollTop += clickY - e.pageY;
 				}
 				
 				//events
-				$img[0].onload = function() {
-					let timeout = framePeriodMillis - (Date.now() - frameLoadStartTime);
-					if (timeout < 0) { 
-						timeout = 0;
-						console.warn("lagging");
+				imgElement.onload = function() {
+					if (!playbackStopped) {
+						let timeout = framePeriodMillis - (Date.now() - frameLoadStartTime);
+						if (timeout < 0) { 
+							timeout = 0;
+							console.warn("lagging");
+						}
+						setTimeout(function() {
+							changeFrame();
+						}, timeout);
 					}
-					setTimeout(function() {
-						changeFrame();
-					}, timeout);
 				};
-				$img[0].onerror = function() {
-					!playbackStopped && log("error loading image at " + $img.attr("src"));
-					playbackStopped = true;
-					$img.attr("src", previousImageUrl);
+				imgElement.onerror = function() {
+					if (!playbackStopped) {
+						const currentSrc = imgElement.getAttribute("src");
+						if (currentSrc) {
+							!playbackStopped && log("error loading image at " + currentSrc);
+							playbackStopped = true;
+							imgElement.setAttribute("src", previousImageUrl);
+						}
+					}
 				}
 				
-				$firstImage.change(function(){
-					let imageName = $(this)[0].files[0].name;
+				firstImageInput.onchange = function() {
+					let imageName = this.files[0].name;
 					let match = /\d+(?!.*\d)/g.exec(imageName);
 					if (match === null) {
 						alert("File doesn't have a numeric index in it's name.")
@@ -197,96 +201,94 @@
 						let firstIndex = match[0];
 						let prefix = imageName.substring(0, match.index);
 						let suffix = imageName.substring(match.index + firstIndex.length);
-						$prefix.val(prefix);
-						$suffix.val(suffix);
-						$firstIndex.val(firstIndex);
-						$currentIndex.val(firstIndex);
+						prefixInput.value = prefix;
+						suffixInput.value = suffix;
+						firstIndexInput.value = firstIndex;
+						currentIndexInput.value = firstIndex;
 						loadFormData();
 						if (path) {
-							$img.attr("src", getImageUrl());
+							imgElement.setAttribute("src", getImageUrl());
 						}
 					}
-				});
+				};
 				
-				$path.change(function() {
-					path = $path.val();
+				pathInput.onchange = function() {
+					path = pathInput.value;
 					if (path) {
 						path = "file:///" + path;
 					}
 					if (path && currentIndex !== null) {
-						$img.attr("src", getImageUrl());
+						imgElement.setAttribute("src", getImageUrl());
 					} else {
-						$img.attr("src", "");
+						imgElement.setAttribute("src", "");
 					}
-				});
+				};
 				
-				$flipUpsideDown.change(function() {
-					if ($flipUpsideDown.is(":checked")) {
-						$img.css({ "transform": "scaleY(-1)" });
+				flipUpsideDownInput.onchange = function() {
+					if (this.checked) {
+						imgElement.style.transform = "scaleY(-1)";
 					} else {					
-						$img.css({ "transform": "" });
+						imgElement.style.transform = "";
 					}
-				});
+				};
 				
-				$restartButton.click(function(){
+				restartButton.onclick = function() {
 					clearLog();
 					playbackStopped = false;
 					loadFormData();
-					currentIndex = parseInt($firstIndex.val());
+					currentIndex = parseInt(firstIndexInput.value);
 					changeFrame();	
-				});
+				};
 				
-				$playPauseButton.click(playPause);
+				playPauseButton.onclick = playPause;
 				
 				//pause/resume right click
-				$viewer.contextmenu(function(e) {
+				viewerElement.oncontextmenu = function(e) {
 					e.preventDefault();
 					playPause();
-				});
+				};
 
 				//drag scroll
-				$viewer.on({
-					"mousemove": function(e) {
-						mouseDown && updateScrollPos(e);
-					},
-					"mousedown": function(e) {
-						e.preventDefault();
-						mouseDown = true;
-						clickX = e.pageX;
-						clickY = e.pageY;
-					},
-					"mouseup": function(e) {
-						mouseDown = false;
-						$html.css("cursor", "auto");
-					}
-				});
+				viewerElement.onmousemove = function(e) {
+					mouseDown && updateScrollPos(e);
+				};
+				viewerElement.onmousedown = function(e) {
+					e.preventDefault();
+					mouseDown = true;
+					clickX = e.pageX;
+					clickY = e.pageY;
+				};
+				viewerElement.onmouseup = function(e) {
+					mouseDown = false;
+					html.style.cursor = "auto";
+				};
 				
 				//next previous frame with arrows
-				$document.keyup(function(e){
-					if (!$inputs.is(":focus")) {
+				document.onkeyup = function(e) {
+					const activeElement = document.activeElement;
+					if (activeElement === null || activeElement.tagName !== "INPUT") {
 						let key = e.which;
 						switch (key) {
 							case 37: //left
-								currentIndex -= parseInt($indexLeap.val());
-								$img.attr("src", getImageUrl());
-								$currentIndex.val(currentIndex);
+								currentIndex -= parseInt(indexLeapInput.value);
+								imgElement.setAttribute("src", getImageUrl());
+								currentIndexInput.value = currentIndex;
 							break;
 							case 39://right
-								currentIndex += parseInt($indexLeap.val());
-								$img.attr("src", getImageUrl());
-								$currentIndex.val(currentIndex);
+								currentIndex += parseInt(indexLeapInput.value);
+								imgElement.setAttribute("src", getImageUrl());
+								currentIndexInput.value = currentIndex;
 							break;
 						}
 					}
-				});	
+				};	
 				
 				//init				
 				loadFormData();
 				if (path && currentIndex !== null) {
-					$img.attr("src", getImageUrl());
+					imgElement.setAttribute("src", getImageUrl());
 				}
 				
 			</script>
 	 </body>
 </html>
-
