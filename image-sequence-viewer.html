@@ -189,7 +189,7 @@
 					if (!playbackStopped) {
 						const currentSrc = imgElement.getAttribute("src");
 						if (currentSrc) {
-							!playbackStopped && log("error loading image at " + currentSrc);
+							log("error loading image at " + currentSrc);
 							playbackStopped = true;
 							imgElement.setAttribute("src", previousImageUrl);
 						}
