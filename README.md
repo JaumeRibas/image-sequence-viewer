@@ -5,7 +5,7 @@ The images must be all in the same folder and have a consistent name with a nume
 
 ## Download
 
-[image-sequence-viewer.html](https://github.com/JaumeRibas/image-sequence-viewer/releases/download/v1.1.1/image-sequence-viewer.html)
+[image-sequence-viewer.html](https://github.com/JaumeRibas/image-sequence-viewer/releases/download/v1.1.2/image-sequence-viewer.html)
 
 ## How to use
 
