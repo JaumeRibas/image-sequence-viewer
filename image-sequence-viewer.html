@@ -101,20 +101,20 @@
 				let clickY;
 				let previousImageUrl;
 				let frameLoadStartTime;
-				let imgElement = document.getElementById("img");
-				let logElement = document.getElementById("log");
-				let pathInput = document.getElementById("path");
-				let currentIndexInput = document.getElementById("current-index");
-				let indexLeapInput = document.getElementById("index-leap");
-				let prefixInput = document.getElementById("prefix");
-				let suffixInput = document.getElementById("suffix");
-				let firstIndexInput = document.getElementById("first-index");
-				let firstImageInput = document.getElementById("first-image");
-				let flipUpsideDownInput = document.getElementById("filp-upside-down");
-				let playPauseButton = document.getElementById("playPauseButton");
-				let restartButton = document.getElementById("restartButton");
-				let viewerElement = document.getElementById("viewer");
-				let html = document.documentElement;
+				const imgElement = document.getElementById("img");
+				const logElement = document.getElementById("log");
+				const pathInput = document.getElementById("path");
+				const currentIndexInput = document.getElementById("current-index");
+				const indexLeapInput = document.getElementById("index-leap");
+				const prefixInput = document.getElementById("prefix");
+				const suffixInput = document.getElementById("suffix");
+				const firstIndexInput = document.getElementById("first-index");
+				const firstImageInput = document.getElementById("first-image");
+				const flipUpsideDownInput = document.getElementById("filp-upside-down");
+				const playPauseButton = document.getElementById("playPauseButton");
+				const restartButton = document.getElementById("restartButton");
+				const viewerElement = document.getElementById("viewer");
+				const html = document.documentElement;
 				
 				//functions
 				function log(text) {
@@ -159,7 +159,7 @@
 				function changeFrame() {
 					frameLoadStartTime = Date.now();
 					currentIndex += indexLeap;
-					let imageUrl = getImageUrl();
+					const imageUrl = getImageUrl();
 					previousImageUrl = imgElement.getAttribute("src");
 					console.log(imageUrl);	
 					imgElement.setAttribute("src", imageUrl);
@@ -195,14 +195,14 @@
 				}
 				
 				firstImageInput.onchange = function() {
-					let imageName = this.files[0].name;
-					let match = /\d+(?!.*\d)/g.exec(imageName);
+					const imageName = this.files[0].name;
+					const match = /\d+(?!.*\d)/g.exec(imageName);
 					if (match === null) {
 						alert("File doesn't have a numeric index in it's name.")
 					} else {
-						let firstIndex = match[0];
-						let prefix = imageName.substring(0, match.index);
-						let suffix = imageName.substring(match.index + firstIndex.length);
+						const firstIndex = match[0];
+						const prefix = imageName.substring(0, match.index);
+						const suffix = imageName.substring(match.index + firstIndex.length);
 						prefixInput.value = prefix;
 						suffixInput.value = suffix;
 						firstIndexInput.value = firstIndex;
@@ -269,7 +269,7 @@
 				document.onkeyup = function(e) {
 					const activeElement = document.activeElement;
 					if (activeElement === null || activeElement.tagName !== "INPUT") {
-						let key = e.which;
+						const key = e.which;
 						switch (key) {
 							case 37: //left
 								currentIndex -= parseInt(indexLeapInput.value);
