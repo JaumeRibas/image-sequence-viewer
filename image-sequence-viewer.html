@@ -140,6 +140,11 @@
 					}
 					prefix = prefixInput.value;
 					suffix = suffixInput.value;
+					if (flipUpsideDownInput.checked) {
+						imgElement.style.transform = "scaleY(-1)";
+					} else {					
+						imgElement.style.transform = "";
+					}
 				}
 				
 				function getImageUrl() {
