@@ -99,6 +99,7 @@
 				let mouseDown = false;
 				let clickX;
 				let clickY;
+				let imageUrl;
 				let previousImageUrl;
 				let frameLoadStartTime;
 				const imgElement = document.getElementById("img");
@@ -152,11 +153,12 @@
 				}
 				
 				function playPause() {
-					currentIndex = parseInt(currentIndexInput.value);
 					if (!playbackStopped) {
 						playbackStopped = true;
 					} else {
+						clearLog();
 						playbackStopped = false;
+						loadFormData();
 						changeFrame();
 					}
 				}
@@ -164,8 +166,8 @@
 				function changeFrame() {
 					frameLoadStartTime = Date.now();
 					currentIndex += indexLeap;
-					const imageUrl = getImageUrl();
-					previousImageUrl = imgElement.getAttribute("src");
+					previousImageUrl = imageUrl;
+					imageUrl = getImageUrl();
 					console.log(imageUrl);	
 					imgElement.setAttribute("src", imageUrl);
 					currentIndexInput.value = currentIndex;
@@ -193,9 +195,10 @@
 
 				imgElement.onerror = function() {
 					if (!playbackStopped) {
-						log("error loading image at " + imgElement.getAttribute("src"));
+						log("error loading image at " + imageUrl);
 						playbackStopped = true;
-						imgElement.setAttribute("src", previousImageUrl);
+						imageUrl = previousImageUrl;
+						imgElement.setAttribute("src", imageUrl);
 					}
 				}
 				
@@ -203,7 +206,7 @@
 					const imageName = this.files[0].name;
 					const match = /\d+(?!.*\d)/g.exec(imageName);
 					if (match === null) {
-						alert("File doesn't have a numeric index in it's name.")
+						alert("The selected image file doesn't have a numeric index in its name.")
 					} else {
 						const firstIndex = match[0];
 						const prefix = imageName.substring(0, match.index);
@@ -214,7 +217,9 @@
 						currentIndexInput.value = firstIndex;
 						loadFormData();
 						if (path) {
-							imgElement.setAttribute("src", getImageUrl());
+							previousImageUrl = imageUrl;
+							imageUrl = getImageUrl();
+							imgElement.setAttribute("src", imageUrl);
 						}
 					}
 				};
@@ -224,11 +229,13 @@
 					if (path) {
 						path = "file:///" + path;
 					}
+					previousImageUrl = imageUrl;
 					if (path && currentIndex !== null) {
-						imgElement.setAttribute("src", getImageUrl());
+						imageUrl = getImageUrl();
 					} else {
-						imgElement.setAttribute("src", "");
+						imageUrl = "";
 					}
+					imgElement.setAttribute("src", imageUrl);
 				};
 				
 				flipUpsideDownInput.onchange = function() {
@@ -278,12 +285,16 @@
 						switch (key) {
 							case 37: //left
 								currentIndex -= parseInt(indexLeapInput.value);
-								imgElement.setAttribute("src", getImageUrl());
+								previousImageUrl = imageUrl;
+								imageUrl = getImageUrl();
+								imgElement.setAttribute("src", imageUrl);
 								currentIndexInput.value = currentIndex;
 							break;
-							case 39://right
+							case 39: //right
 								currentIndex += parseInt(indexLeapInput.value);
-								imgElement.setAttribute("src", getImageUrl());
+								previousImageUrl = imageUrl;
+								imageUrl = getImageUrl();
+								imgElement.setAttribute("src", imageUrl);
 								currentIndexInput.value = currentIndex;
 							break;
 						}
@@ -293,7 +304,8 @@
 				//init				
 				loadFormData();
 				if (path && currentIndex !== null) {
-					imgElement.setAttribute("src", getImageUrl());
+					imageUrl = getImageUrl();
+					imgElement.setAttribute("src", imageUrl);
 				}
 				
 			</script>
